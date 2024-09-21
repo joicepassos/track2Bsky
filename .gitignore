@@ -43,3 +43,5 @@ out/
 .gradle/
 build/
 
+spotify_tokens.properties
+

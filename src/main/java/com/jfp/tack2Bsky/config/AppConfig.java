@@ -1,16 +1,12 @@
 package com.jfp.tack2Bsky.config;
 
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
-import java.util.Collections;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestClient;
 
 @Configuration
@@ -21,20 +17,12 @@ public class AppConfig {
     return builder.build();
   }
 
-  private MappingJackson2HttpMessageConverter getMappingJackson2HttpMessageConverter() {
-    MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter =
-        new MappingJackson2HttpMessageConverter();
-    mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
-        Collections.singletonList(APPLICATION_FORM_URLENCODED));
-    return mappingJackson2HttpMessageConverter;
-  }
-
   @Bean
   OpenAPI openApi() {
     var server = new Server();
-    String context = "/track2Bsky";
+    String context = "/track2bsky";
     String url = "http://localhost";
-    String port = "8887";
+    String port = "8080";
     server.setUrl(url + ":" + port + context);
     server.setDescription("local");
     String version = "v1.0";

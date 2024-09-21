@@ -2,6 +2,7 @@ package com.jfp.tack2Bsky.service.impl;
 
 import com.jfp.tack2Bsky.client.dto.response.SpotifyAutheticationResponse;
 import com.jfp.tack2Bsky.service.SpotifyTokenService;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,8 @@ public class SpotifyTokenServiceImpl implements SpotifyTokenService {
 
   @Override
   public void saveAccessToken(final SpotifyAutheticationResponse spotifyAutheticationResponse) {
-    long expirationTime = System.currentTimeMillis() + spotifyAutheticationResponse.expiresIn() * 1000L;
+    long expirationTime =
+        System.currentTimeMillis() + spotifyAutheticationResponse.expiresIn() * 1000L;
 
     Properties properties = new Properties();
     properties.setProperty("accessToken", spotifyAutheticationResponse.accessToken());
@@ -43,6 +45,18 @@ public class SpotifyTokenServiceImpl implements SpotifyTokenService {
     } catch (Exception e) {
       log.error("Failed to refresh access token", e);
       throw new RuntimeException("Failed to refresh access token", e);
+    }
+  }
+
+  @Override
+  public String getAccessToken() {
+    Properties properties = new Properties();
+    try (FileInputStream fileInputStream = new FileInputStream(TOKENS_FILE)) {
+      properties.load(fileInputStream);
+      return properties.getProperty("accessToken");
+    } catch (Exception e) {
+      log.error("Failed to get access token", e);
+      throw new RuntimeException("Failed to get access token", e);
     }
   }
 }

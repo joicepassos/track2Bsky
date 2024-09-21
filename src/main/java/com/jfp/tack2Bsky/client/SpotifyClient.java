@@ -2,11 +2,13 @@ package com.jfp.tack2Bsky.client;
 
 import static com.jfp.tack2Bsky.util.Track2BskyUtil.generateRandomString;
 
+import com.jfp.tack2Bsky.client.dto.response.CurrentlyPlayingResponse;
 import com.jfp.tack2Bsky.client.dto.response.SpotifyAutheticationResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -29,7 +30,10 @@ public class SpotifyClient {
   private final RestClient restClient;
 
   @Value("${app.spotify.accounts_url}")
-  private String spotifyUrl;
+  private String accountUrl;
+
+  @Value("${app.spotify.url}")
+  private String apiUrl;
 
   @Value("${app.spotify.client_id}")
   private String clientId;
@@ -68,8 +72,8 @@ public class SpotifyClient {
     ResponseEntity<SpotifyAutheticationResponse> response =
         restClient
             .post()
-            .uri(spotifyUrl + "/api/token")
-            .headers(headers())
+            .uri(accountUrl + "/api/token")
+            .headers(getTokenHeaders())
             .body(body)
             .retrieve()
             .onStatus(HttpStatusCode::isError, this::handleException)
@@ -80,12 +84,38 @@ public class SpotifyClient {
     return response.getBody();
   }
 
-  private Consumer<HttpHeaders> headers() {
+  public  CurrentlyPlayingResponse getCurrentlyPlaying(String accessToken) {
+    log.info("GettingCurrentlyPlaying - Spotify");
+
+    String uri = "%s/me/player/currently-playing".formatted(apiUrl);
+    ResponseEntity<CurrentlyPlayingResponse> response =
+        restClient
+            .get()
+            .uri(uri)
+            .headers(getHeaders(accessToken))
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, this::handleException)
+            .toEntity(CurrentlyPlayingResponse.class);
+
+    log.info("GotCurrentlyPlaying - Spotify - Response: {}", response.getBody());
+
+    return response.getBody();
+  }
+
+  private Consumer<HttpHeaders> getHeaders(String accessToken) {
+    return httpHeaders -> {
+      httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+      httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+      httpHeaders.add("Authorization", "Bearer " + accessToken);
+    };
+  }
+
+  private Consumer<HttpHeaders> getTokenHeaders() {
     return headers -> {
       headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
       String auth =
-              Base64.getEncoder()
-                      .encodeToString((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
+          Base64.getEncoder()
+              .encodeToString((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
       headers.set("Authorization", "Basic " + auth);
     };
   }
@@ -93,14 +123,12 @@ public class SpotifyClient {
   private void handleException(final HttpRequest request, final ClientHttpResponse response)
       throws IOException {
     log.error("Failed to authenticate with Spotify - response: {}", response);
-    throw new RestClientException(
+    throw new RestClientResponseException(
         "Failed to authenticate with Spotify...",
-        new RestClientResponseException(
-            "Failed to authenticate with Spotify...",
-            response.getStatusCode(),
-            response.getStatusText(),
-            response.getHeaders(),
-            null,
-            null));
+        response.getStatusCode(),
+        response.getStatusText(),
+        response.getHeaders(),
+        null,
+        null);
   }
 }

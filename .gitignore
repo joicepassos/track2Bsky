@@ -35,3 +35,12 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### application.properties ###
+/src/main/resources/application.yml
+
+### GRADLE ###
+.gradle/
+build/
+
+spotify_tokens.properties

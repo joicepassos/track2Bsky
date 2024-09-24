@@ -1,6 +1,5 @@
 package com.jfp.tack2Bsky.controller;
 
-import com.jfp.tack2Bsky.client.dto.response.CurrentlyPlayingResponse;
 import com.jfp.tack2Bsky.dto.ListeningResponse;
 import com.jfp.tack2Bsky.service.SpotifyService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +18,7 @@ public class SpotifyController {
 
   private final SpotifyService spotifyService;
 
-  //TODO:: Implement token and check token for security endpoints
+  // TODO:: Implement token and check token for security endpoints
 
   @GetMapping("/login")
   public void login(HttpServletResponse response) throws IOException {

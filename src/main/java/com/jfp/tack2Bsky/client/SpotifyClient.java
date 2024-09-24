@@ -84,7 +84,7 @@ public class SpotifyClient {
     return response.getBody();
   }
 
-  public  CurrentlyPlayingResponse getCurrentlyPlaying(String accessToken) {
+  public CurrentlyPlayingResponse getCurrentlyPlaying(String accessToken) {
     log.info("GettingCurrentlyPlaying - Spotify");
 
     String uri = "%s/me/player/currently-playing".formatted(apiUrl);

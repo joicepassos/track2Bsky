@@ -21,15 +21,21 @@ public class TrackSyncServiceImpl implements TrackSyncService {
   public void syncTracks(final String username, final String password) {
     blueskyService.login(username, password);
     ListeningResponse listeningResponse = spotifyService.getCurrentlyPlaying();
+
+    if (listeningResponse == null) {
+      log.info("No track is currently playing on Spotify.");
+      return;
+    }
+
     log.info("Syncing tracks from Spotify to Bluesky.");
     String description = getTrackDescription(listeningResponse);
-    blueskyService.changeProfileDescription(
-        username, password, description);
+    blueskyService.changeProfileDescription(username, password, description);
   }
 
   private String getTrackDescription(ListeningResponse listeningResponse) {
+
     return String.format(
-        "Ouvindo %s -  %s",
+        "Listening to '%s' by '%s' on Spotify...🎵",
         listeningResponse.trackName(),
         listeningResponse.artists().stream()
             .map(ListeningResponse.Artist::name)

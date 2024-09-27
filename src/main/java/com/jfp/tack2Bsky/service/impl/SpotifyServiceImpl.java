@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Service
@@ -65,9 +66,27 @@ public class SpotifyServiceImpl implements SpotifyService {
     if (accessToken == null) {
       return null;
     }
-    CurrentlyPlayingResponse currentlyPlayingResponse =
-        spotifyClient.getCurrentlyPlaying(accessToken);
+
+    CurrentlyPlayingResponse currentlyPlayingResponse = null;
+    try {
+      currentlyPlayingResponse = spotifyClient.getCurrentlyPlaying(accessToken);
+    } catch (RestClientResponseException e) {
+      if (e.getRawStatusCode() == 401) {
+        log.info("Access token expired, refreshing token.");
+        SpotifyAutheticationResponse authResponse =
+            spotifyClient.refreshToken(spotifyTokenService.getRefreshToken());
+        accessToken = authResponse.accessToken();
+        currentlyPlayingResponse = spotifyClient.getCurrentlyPlaying(accessToken);
+      } else {
+        throw e;
+      }
+    }
+
     log.info("Retrieved CurrentlyPlayingTrack from Spotify: {}", currentlyPlayingResponse);
+    if (currentlyPlayingResponse == null) {
+      return null;
+    }
+
     List<ListeningResponse.Artist> artists =
         currentlyPlayingResponse.item().artists().stream()
             .map(artist -> new ListeningResponse.Artist(artist.name()))

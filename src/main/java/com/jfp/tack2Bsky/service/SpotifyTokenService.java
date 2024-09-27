@@ -6,7 +6,7 @@ public interface SpotifyTokenService {
 
   void saveAccessToken(SpotifyAutheticationResponse spotifyAutheticationResponse);
 
-  void refreshAccessToken(SpotifyAutheticationResponse spotifyAutheticationResponse);
-
   String getAccessToken();
+
+  String getRefreshToken();
 }

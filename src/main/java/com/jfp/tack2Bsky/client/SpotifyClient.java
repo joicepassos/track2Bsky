@@ -61,6 +61,28 @@ public class SpotifyClient {
         .toUri();
   }
 
+  public SpotifyAutheticationResponse refreshToken(String refreshToken) {
+    log.info("RefreshingToken - Spotify");
+
+    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+    body.add("grant_type", "refresh_token");
+    body.add("refresh_token", refreshToken);
+    body.add("client_id", clientId);
+
+    ResponseEntity<SpotifyAutheticationResponse> response =
+        restClient
+            .post()
+            .uri(accountUrl + "/api/token")
+            .headers(getTokenHeaders())
+            .body(body)
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, this::handleException)
+            .toEntity(SpotifyAutheticationResponse.class);
+
+    log.info("RefreshedToken - Spotify");
+    return response.getBody();
+  }
+
   public SpotifyAutheticationResponse exchangeCodeForToken(String code) {
     log.info("ExchangingCodeForToken - Spotify - code: {}", code);
 

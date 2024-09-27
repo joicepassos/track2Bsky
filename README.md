@@ -1,4 +1,4 @@
-# Core Application
+# Track2Bsky
 
 ## Description
 This project is a Spring Boot application that provides a REST API for managing core resources. It includes security configurations, encoded password generation, and integration with Swagger for API documentation. This project also serves as a template for future projects using Java 21.
@@ -40,5 +40,14 @@ This will start the application on the default port 8080. You can check the API 
 ```
 http://localhost:8080/swagger-ui/
 ```
+
+## Security
+
+The application uses JWT-based authentication. To access protected endpoints, you must include the JWT token in the request header:
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+
 
 

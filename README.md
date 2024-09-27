@@ -1,7 +1,7 @@
 # Track2Bsky
 
 ## Description
-This project is a Spring Boot application that provides a REST API for managing core resources. It includes security configurations, encoded password generation, and integration with Swagger for API documentation. This project also serves as a template for future projects using Java 21.
+This project is a Spring Boot application that provides a REST API for integrating a user's Spotify and Bluesky accounts. The primary functionality of this backend is to update the user's Bluesky profile description with the song currently playing on Spotify. It features secure authentication using JWT tokens, automatic password encoding, and comprehensive API documentation via Swagger (OpenAPI). The project also serves as a robust template for future applications utilizing Java 21.
 
 ## Technologies Used
 - Java 21

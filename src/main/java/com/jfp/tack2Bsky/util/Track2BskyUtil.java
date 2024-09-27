@@ -1,16 +1,8 @@
 package com.jfp.tack2Bsky.util;
 
-import java.util.function.Consumer;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
 public class Track2BskyUtil {
 
-  public static Consumer<HttpHeaders> getheaders() {
-    return httpHeaders -> {
-      httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-    };
-  }
+  public static final String TOKEN_INTERNAL = "x-internal-token";
 
   public static String generateRandomString(int length) {
     String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

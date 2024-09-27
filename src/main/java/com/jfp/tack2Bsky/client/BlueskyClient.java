@@ -24,12 +24,8 @@ import org.springframework.web.client.RestClientResponseException;
 @RequiredArgsConstructor
 public class BlueskyClient {
 
-  private static final String PROFILE_COLLECTION = "app.bsky.actor.profile";
   private static final String AUTHENTICATION_URI =
       "https://bsky.social/xrpc/com.atproto.server.createSession";
-  private static final String RECORD_TYPE = "$type";
-  private static final String DESCRIPTION_FIELD = "description";
-
 
   private final RestClient restClient;
 
@@ -43,7 +39,8 @@ public class BlueskyClient {
     log.info("Authenticating with Bluesky...");
     Map<String, String> credentials = Map.of("identifier", username, "password", password);
 
-    BskyAuthenticationResponse response = postRequest(AUTHENTICATION_URI, credentials, null, BskyAuthenticationResponse.class);
+    BskyAuthenticationResponse response =
+        postRequest(AUTHENTICATION_URI, credentials, null, BskyAuthenticationResponse.class);
     tokenJwt = response.accessJwt();
     did = response.did();
 
@@ -54,43 +51,55 @@ public class BlueskyClient {
     String uri = blueskyUrl + "/com.atproto.repo.putRecord";
     authenticate(username, password);
 
-    // Extrai o valor correto do objeto retornado pelo getCurrentProfile
-    Map<String, Object> currentProfile = (Map<String, Object>) getCurrentProfile(tokenJwt, did).get("value");
+    Map<String, Object> currentProfile =
+        (Map<String, Object>) getCurrentProfile(tokenJwt, did).get("value");
 
     log.info("Updating profile description on Bluesky - Current Profile: {}", currentProfile);
 
-    // Monta o record com os campos existentes
+    String currentDescription = currentProfile.get("description").toString();
+    if (currentDescription.equals(description)) {
+      description = currentDescription;
+    } else {
+      if (currentDescription.contains("Listening")) {
+        int index = currentDescription.indexOf("Listening");
+        currentDescription = currentDescription.substring(0, index);
+      }
+      description = currentDescription + " " + description;
+    }
+
     Map<String, Object> record = new HashMap<>();
-    record.put("avatar", currentProfile.get("avatar"));  // Preserva o avatar
-    record.put("banner", currentProfile.get("banner"));  // Preserva o banner
-    record.put("description", description);  // Atualiza a descrição
-    record.put("displayName", currentProfile.get("displayName"));  // Preserva o displayName
+    record.put("avatar", currentProfile.get("avatar"));
+    record.put("banner", currentProfile.get("banner"));
+    record.put("description", description);
+    record.put("displayName", currentProfile.get("displayName"));
 
     log.info("Updating profile description on Bluesky - New Profile: {}", record);
 
-    // Monta o profileUpdate com o record
     Map<String, Object> profileUpdate = new HashMap<>();
     profileUpdate.put("collection", "app.bsky.actor.profile");
     profileUpdate.put("repo", did);
     profileUpdate.put("rkey", "self");
-    profileUpdate.put("record", record);  // Passa o objeto record
+    profileUpdate.put("record", record);
 
     postRequest(uri, profileUpdate, tokenJwt, String.class);
   }
 
-  private Map<String, Object> getCurrentProfile(String token, String did) {
-    String uri = blueskyUrl + "/com.atproto.repo.getRecord?collection=app.bsky.actor.profile&repo=" + did + "&rkey=self";
+  private Map getCurrentProfile(String token, String did) {
+    String uri =
+        blueskyUrl
+            + "/com.atproto.repo.getRecord?collection=app.bsky.actor.profile&repo="
+            + did
+            + "&rkey=self";
 
     return restClient
-            .get()
-            .uri(uri)
-            .headers(headersWithBearer(token))
-            .retrieve()
-            .onStatus(HttpStatusCode::isError, this::handleException)
-            .toEntity(Map.class)
-            .getBody();
+        .get()
+        .uri(uri)
+        .headers(headersWithBearer(token))
+        .retrieve()
+        .onStatus(HttpStatusCode::isError, this::handleException)
+        .toEntity(Map.class)
+        .getBody();
   }
-
 
   private <T> T postRequest(String uri, Object body, String token, Class<T> responseType) {
     return restClient
@@ -134,19 +143,17 @@ public class BlueskyClient {
     };
   }
 
-  private void handleException(final HttpRequest request, final ClientHttpResponse response) throws IOException {
+  private void handleException(final HttpRequest request, final ClientHttpResponse response)
+      throws IOException {
     log.error("Failed to process the request on Bluesky...");
     throw new RestClientException(
-            "Failed to process the request on Bluesky. Status: " + response.getStatusCode(),
-            new RestClientResponseException(
-                    "Failed to process the request on Bluesky.",
-                    response.getStatusCode(),
-                    response.getStatusText(),
-                    response.getHeaders(),
-                    response.getBody().readAllBytes(),
-                    null
-            )
-    );
+        "Failed to process the request on Bluesky. Status: " + response.getStatusCode(),
+        new RestClientResponseException(
+            "Failed to process the request on Bluesky.",
+            response.getStatusCode(),
+            response.getStatusText(),
+            response.getHeaders(),
+            response.getBody().readAllBytes(),
+            null));
   }
-
 }

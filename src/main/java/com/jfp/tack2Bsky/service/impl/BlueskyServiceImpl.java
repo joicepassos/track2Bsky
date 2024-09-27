@@ -32,12 +32,12 @@ public class BlueskyServiceImpl implements BlueskyService {
     log.info("ProfileDescriptionChangedBluesky - User: {}", username);
   }
 
-  //TODO:: Implement mensal post creation with spotify listening history analysis
+  // TODO:: Implement mensal post creation with spotify listening history analysis
   @Override
   public void createPost(String content, String username, String password) {
     TokenCredentials tokenCredentials = blueskyTokenService.getAccessToken();
     log.info("CreatingPostBluesky - User: {}", tokenCredentials.did());
-    blueskyClient.createPost(username, password ,content);
+    blueskyClient.createPost(username, password, content);
     log.info("PostCreatedBluesky - User: {}", tokenCredentials.did());
   }
 }

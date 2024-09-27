@@ -7,7 +7,5 @@ public interface BlueskyTokenService {
 
   void saveAccessToken(BskyAuthenticationResponse bskyAuthenticationResponse);
 
-  void refreshAccessToken(BskyAuthenticationResponse bskyAuthenticationResponse);
-
   TokenCredentials getAccessToken();
 }

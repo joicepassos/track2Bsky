@@ -1,0 +1,32 @@
+application:
+   title: Track2BSky
+   version: v1.0
+
+spring:
+  security:
+    user:
+      name: admin
+      password: $2a$10$YgEE0XpMb0vjEbhmNt59UOhk5KTCiIHfaHL2THfPFUhdt8qgxrSOe
+
+server:
+    port: 8080
+
+app:
+    bluesky:
+        url: https://public.api.bsky.app/xrpc
+        identifier: bluesky
+        password: YOUR_PASSWORD
+        client_id: YOUR_CLIENT_ID
+    spotify:
+        accounts_url: https://accounts.spotify.com
+        client_id: YOUR_CLIENT_ID
+        client_secret: YOUR_CLIENT_SECRET
+        redirect_uri: http://localhost:8080/spotify/callback
+        scopes: user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing
+
+logging:
+    level:
+        org.springframework: INFO
+        com.track2bsky: DEBUG
+
+
